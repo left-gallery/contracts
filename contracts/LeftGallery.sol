@@ -34,8 +34,6 @@ contract LeftGallery is ERC721Full, Ownable {
         admins += 1;
     }
 
-    function() external payable {}
-
     function mint(address recepient, uint256 tokenId)
         public
         onlyAdminOrController
@@ -76,6 +74,9 @@ contract LeftGallery is ERC721Full, Ownable {
     {
         return Metadata(metadata).tokenURI(_tokenId);
     }
+
+    // FIXME:
+    // function() external payable {}
 
     /**
      * @dev Moves Eth to a certain address for use in the CloversController
