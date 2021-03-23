@@ -16,6 +16,7 @@ chai.use(solidity);
 chai.use(chaiAsPromised);
 const { expect } = chai;
 const { AddressZero } = ethers.constants;
+const { parseEther } = ethers.utils;
 
 describe("LeftGallery", () => {
   let metadata: Metadata;
@@ -25,6 +26,9 @@ describe("LeftGallery", () => {
     bob: SignerWithAddress,
     charly: SignerWithAddress;
   let aliceLG: LeftGallery, bobLG: LeftGallery, charlyLG: LeftGallery;
+  let aliceC: LeftGalleryController,
+    bobC: LeftGalleryController,
+    charlyC: LeftGalleryController;
 
   beforeEach(async () => {
     [alice, bob, charly] = await ethers.getSigners();
@@ -63,7 +67,13 @@ describe("LeftGallery", () => {
       token.address,
       alice.address
     );
-    await token.deployed();
+    await controller.deployed();
+    await token.updateController(controller.address);
+
+    // Connect the contract to different wallets
+    aliceC = controller.connect(alice);
+    bobC = controller.connect(bob);
+    charlyC = controller.connect(charly);
   });
 
   describe("LeftGallery.sol", () => {
@@ -85,14 +95,20 @@ describe("LeftGallery", () => {
     });
 
     it("should allow owner to move funds", async function () {
-      const amount = ethers.utils.parseEther("1");
+      const amount = parseEther("1");
       const balanceBefore = await charly.getBalance();
+
+      // Bob sends eth to the contract
       await bob.sendTransaction({
         to: token.address,
         value: amount,
       });
+
+      // Alice moves the eth to Charly
       await aliceLG.moveEth(charly.address, amount);
       const balanceAfter = await charly.getBalance();
+
+      // Charly should have +1 eth now
       const diff = balanceAfter.sub(balanceBefore).toString();
       expect(diff).to.equal(amount);
     });
@@ -136,6 +152,68 @@ describe("LeftGallery", () => {
       // make sure the token at index 0 has id 1
       let tokenId = await token.tokenOfOwnerByIndex(alice.address, "0");
       expect(tokenId.toString()).to.equal("1");
+    });
+  });
+
+  describe("LeftGalleryController.sol", () => {
+    it("should allow owner to add an artwork", async function () {
+      // First artwork has workId 1
+      expect(
+        await controller.addArtwork(
+          charly.address,
+          10,
+          parseEther("0.5"),
+          false
+        )
+      )
+        .to.emit(controller, "newWork")
+        .withArgs(1, charly.address, 10, parseEther("0.5"), false);
+    });
+    it("should allow someone to buy the artwork", async function () {
+      // Alice adds Charly's artwork
+      await controller.addArtwork(
+        charly.address,
+        2,
+        parseEther("0.666"),
+        false
+      );
+
+      // Bob wants to buy all editions
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("0.666") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          1,
+          "1000001",
+          bob.address,
+          parseEther("0.666"),
+          parseEther("0.5661"),
+          parseEther("0.0999")
+        );
+      /*
+        .to.emit(token, "Transfer")
+        .withArgs(AddressZero, bob.address, "1000001");
+        */
+
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("0.666") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          2,
+          "1000002",
+          bob.address,
+          parseEther("0.666"),
+          parseEther("0.5661"),
+          parseEther("0.0999")
+        );
+      /*
+        .to.emit(token, "Transfer")
+        .withArgs(AddressZero, bob.address, "1000002");
+        */
+
+      await expect(
+        bobC.buy(bob.address, 1, { value: parseEther("0.666") })
+      ).to.be.revertedWith("EDITIONS_EXCEEDED");
     });
   });
 });
