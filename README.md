@@ -2,6 +2,8 @@
 
 # left gallery contracts
 
+![left gallery logo](https://left.gallery/icon.png)
+
 Forked from [folia-app/folia-contracts](https://github.com/folia-app/folia-contracts).
 
 Many thanks to [Billy Rennekamp](https://github.com/okwme) 💚
