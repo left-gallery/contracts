@@ -1,4 +1,22 @@
+/**
+ *           __     ______
+ *          / /__  / __/ /_
+ *         / / _ \/ /_/ __/
+ *        / /  __/ __/ /_____
+ *       /_/\___/_/__\__/ / /__  _______  __
+ *         / __ `/ __ `/ / / _ \/ ___/ / / /
+ *        / /_/ / /_/ / / /  __/ /  / /_/ /
+ *        \__, /\__,_/_/_/\___/_/   \__, /
+ *       /____/                    /____/
+ *
+ * https://github.com/left-gallery/contracts/
+ *
+ * Forked from folia-app/folia-contracts: https://github.com/folia-app/folia-contracts
+ * Many thanks to Billy Rennekamp <https://github.com/okwme> and Folia <https://www.folia.app/> 💚
+ */
+
 pragma solidity ^0.5.0;
+
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";

@@ -59,7 +59,7 @@ const config: HardhatUserConfig = {
       url: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [MAINNET_PRIVATE_KEY],
       gasMultiplier: 1.2,
-      gasPrice: 123 * GWEI,
+      gasPrice: 150 * GWEI,
       loggingEnabled: true,
     },
     coverage: {
