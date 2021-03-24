@@ -75,24 +75,8 @@ contract LeftGallery is ERC721Full, Ownable {
         return Metadata(metadata).tokenURI(_tokenId);
     }
 
-    // FIXME:
-    // function() external payable {}
-
     /**
-     * @dev Moves Eth to a certain address for use in the CloversController
-     * @param _to The address to receive the Eth.
-     * @param _amount The amount of Eth to be transferred.
-     */
-    function moveEth(address payable _to, uint256 _amount)
-        public
-        onlyAdminOrController
-    {
-        require(_amount <= address(this).balance);
-        _to.transfer(_amount);
-    }
-
-    /**
-     * @dev Moves Token to a certain address for use in the CloversController
+     * @dev Moves Token to a certain address.
      * @param _to The address to receive the Token.
      * @param _amount The amount of Token to be transferred.
      * @param _token The address of the Token to be transferred.

@@ -47,8 +47,8 @@ task("deploy", "Deploy Contracts")
     )) as Metadata__factory;
     const metadata = await MetadataFactory.deploy();
     console.log("  Address", metadata.address);
+    console.log("  Tx hash", metadata.deployTransaction.hash);
     const metadataReceipt = await metadata.deployed();
-    console.log("  Tx hash", metadataReceipt.deployTransaction.hash);
     extract(
       "Metadata",
       {
@@ -71,8 +71,8 @@ task("deploy", "Deploy Contracts")
       metadata.address
     );
     console.log("  Address", token.address);
+    console.log("  Tx hash", token.deployTransaction.hash);
     const tokenReceipt = await token.deployed();
-    console.log("  Tx hash", tokenReceipt.deployTransaction.hash);
     extract(
       "LeftGallery",
       {
@@ -94,8 +94,8 @@ task("deploy", "Deploy Contracts")
       account.address
     );
     console.log("  Address", controller.address);
+    console.log("  Tx hash", controller.deployTransaction.hash);
     const controllerReceipt = await controller.deployed();
-    console.log("  Tx hash", controllerReceipt.deployTransaction.hash);
     extract(
       "LeftGalleryController",
       {
