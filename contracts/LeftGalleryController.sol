@@ -227,6 +227,15 @@ contract LeftGalleryController is Ownable {
         require(adminSplit <= 100, "SPLIT_MUST_BE_LTE_100");
         require(works[workId].exists, "WORK_DOES_NOT_EXIST");
         works[workId].adminSplit = adminSplit;
+         emit updatedWork(
+            workId,
+            works[workId].artist,
+            works[workId].editions,
+            works[workId].AP,
+            works[workId].price,
+            works[workId].adminSplit,
+            works[workId].paused
+        );
     }
 
     function updateAdminWallet(address payable _adminWallet) public onlyOwner {
