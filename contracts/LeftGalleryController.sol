@@ -32,6 +32,11 @@ contract LeftGalleryController is Ownable {
         uint256 editions,
         uint256 AP,
         uint256 price,
+
+         // this is a percentage, where 100 means the price remains the same
+         // 200 means the price is doubled for each edition
+         // negative values each edition becomes a bit cheaper
+        int256 priceExponent
         uint256 adminSplit,
         bool paused
     );
@@ -41,6 +46,7 @@ contract LeftGalleryController is Ownable {
         uint256 editions,
         uint256 AP,
         uint256 price,
+        int256 priceExponent
         uint256 adminSplit,
         bool paused
     );
@@ -68,6 +74,8 @@ contract LeftGalleryController is Ownable {
         uint256 AP;
         uint256 printed;
         uint256 price;
+        int256 priceExponent;
+        int256 previousPrice;
         address payable artist;
     }
 
@@ -90,6 +98,7 @@ contract LeftGalleryController is Ownable {
         uint256 editions,
         uint256 AP,
         uint256 price,
+        int256 priceExponent,
         uint256 adminSplit,
         bool _paused
     ) public onlyOwner {
@@ -101,15 +110,18 @@ contract LeftGalleryController is Ownable {
         works[latestWorkId].editions = editions;
         works[latestWorkId].AP = AP;
         works[latestWorkId].price = price;
+        works[latestWorkId].priceExponent = priceExponent;
         works[latestWorkId].artist = artist;
         works[latestWorkId].adminSplit = adminSplit;
         works[latestWorkId].paused = _paused;
+
         emit newWork(
             latestWorkId,
             artist,
             editions,
             AP,
             price,
+            priceExponent,
             adminSplit,
             _paused
         );
@@ -127,6 +139,7 @@ contract LeftGalleryController is Ownable {
             works[workId].editions,
             works[workId].AP,
             works[workId].price,
+            works[workId].priceExponent,
             works[workId].adminSplit,
             works[workId].paused
         );
@@ -145,6 +158,7 @@ contract LeftGalleryController is Ownable {
             works[workId].editions,
             works[workId].AP,
             works[workId].price,
+            works[workId].priceExponent,
             works[workId].adminSplit,
             works[workId].paused
         );
@@ -162,6 +176,7 @@ contract LeftGalleryController is Ownable {
             works[workId].editions,
             works[workId].AP,
             works[workId].price,
+            works[workId].priceExponent,
             works[workId].adminSplit,
             works[workId].paused
         );
@@ -180,6 +195,7 @@ contract LeftGalleryController is Ownable {
             works[workId].editions,
             works[workId].AP,
             works[workId].price,
+            works[workId].priceExponent,
             works[workId].adminSplit,
             works[workId].paused
         );
@@ -197,6 +213,7 @@ contract LeftGalleryController is Ownable {
             works[workId].editions,
             works[workId].AP,
             works[workId].price,
+            works[workId].priceExponent,
             works[workId].adminSplit,
             works[workId].paused
         );
@@ -210,13 +227,20 @@ contract LeftGalleryController is Ownable {
     {
         require(!works[workId].paused, "WORK_NOT_YET_FOR_SALE");
         require(works[workId].exists, "WORK_DOES_NOT_EXIST");
+
+
+        uint256 currentPrice = works[workId].printed == 0
+            ? works[workId].price
+            : works[workId].previousPrice.mul(works[workId].priceExponent.div(100));
+
+        require(msg.value >= currentPrice, "DID_NOT_SEND_PRICE");
+
+        works[workId].previousPrice = currentPrice;
         require(
             works[workId].editions - works[workId].AP > works[workId].printed,
             "EDITIONS_EXCEEDED"
         );
-        require(msg.value == works[workId].price, "DID_NOT_SEND_PRICE");
-
-
+        
         uint256 editionId = works[workId].printed.add(1);
         works[workId].printed = editionId;
 
@@ -235,7 +259,7 @@ contract LeftGalleryController is Ownable {
             editionId,
             tokenId,
             recipient,
-            works[workId].price,
+            msg.value,
             artistReceives,
             adminReceives
         );
@@ -251,6 +275,22 @@ contract LeftGalleryController is Ownable {
             works[workId].editions,
             works[workId].AP,
             works[workId].price,
+            works[workId].priceExponent,
+            works[workId].adminSplit,
+            works[workId].paused
+        );
+    }
+
+    function updatePriceExponent(uint256 workId, int256 priceExponent) public onlyOwner {
+        require(works[workId].exists, "WORK_DOES_NOT_EXIST");
+        works[workId].priceExponent = priceExponent;
+         emit updatedWork(
+            workId,
+            works[workId].artist,
+            works[workId].editions,
+            works[workId].AP,
+            works[workId].price,
+            works[workId].priceExponent,
             works[workId].adminSplit,
             works[workId].paused
         );
