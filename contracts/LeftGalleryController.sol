@@ -40,6 +40,7 @@ contract LeftGalleryController is Ownable {
         uint256 adminSplit,
         bool paused
     );
+
     event updatedWork(
         uint256 workId,
         address payable artist,
@@ -50,6 +51,7 @@ contract LeftGalleryController is Ownable {
         uint256 adminSplit,
         bool paused
     );
+
     event editionBought(
         uint256 workId,
         uint256 editionId,
@@ -219,7 +221,7 @@ contract LeftGalleryController is Ownable {
         );
     }
 
-    function nextPrice(uint256 workId) public returns (uint256) {
+    function nextPrice(uint256 workId) public view returns (uint256) {
         return works[workId].printed == 0
             ? works[workId].price
             : works[workId].previousPrice.mul(works[workId].priceMultiplier.div(100));
@@ -287,7 +289,7 @@ contract LeftGalleryController is Ownable {
     function updatePriceExponent(uint256 workId, uint256 priceMultiplier) public onlyOwner {
         require(works[workId].exists, "WORK_DOES_NOT_EXIST");
         works[workId].priceMultiplier = priceMultiplier;
-         emit updatedWork(
+        emit updatedWork(
             workId,
             works[workId].artist,
             works[workId].editions,
