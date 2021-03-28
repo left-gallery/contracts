@@ -94,7 +94,7 @@ contract LeftGalleryController is Ownable {
         bool _paused
     ) public onlyOwner {
         require(editions < MAX_EDITIONS, "MAX_EDITIONS_EXCEEDED");
-
+        require(AP < editions, "WORK_AP_EXCEEDS_EDITION");
         latestWorkId += 1;
 
         works[latestWorkId].exists = true;
@@ -156,6 +156,24 @@ contract LeftGalleryController is Ownable {
     {
         require(works[workId].exists, "WORK_DOES_NOT_EXIST");
         works[workId].price = _price;
+        emit updatedWork(
+            workId,
+            works[workId].artist,
+            works[workId].editions,
+            works[workId].AP,
+            works[workId].price,
+            works[workId].adminSplit,
+            works[workId].paused
+        );
+    }
+
+    function updateArtworkAP(uint256 workId, uint256 _AP)
+        public
+        onlyOwner
+    {
+        require(works[workId].exists, "WORK_DOES_NOT_EXIST");
+        require(_AP < works[workId].editions, "WORK_AP_EXCEEDS_EDITION");
+        works[workId].AP = _AP;
         emit updatedWork(
             workId,
             works[workId].artist,
