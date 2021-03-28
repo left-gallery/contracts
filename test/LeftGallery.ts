@@ -163,19 +163,21 @@ describe("LeftGallery", () => {
         await controller.addArtwork(
           charly.address,
           10,
+          2,
           parseEther("0.5"),
           25,
           false
         )
       )
         .to.emit(controller, "newWork")
-        .withArgs(1, charly.address, 10, parseEther("0.5"), 25, false);
+        .withArgs(1, charly.address, 10, 2, parseEther("0.5"), 25, false);
     });
     it("should allow someone to buy the artwork", async function () {
       // Alice adds Charly's artwork
       await controller.addArtwork(
         charly.address,
-        2,
+        2, // editions
+        1, // APs
         parseEther("0.666"),
         15,
         false
