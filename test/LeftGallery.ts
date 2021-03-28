@@ -94,26 +94,6 @@ describe("LeftGallery", () => {
       );
     });
 
-    it("should allow owner to move funds", async function () {
-      return;
-      const amount = parseEther("1");
-      const balanceBefore = await charly.getBalance();
-
-      // Bob sends eth to the contract
-      await bob.sendTransaction({
-        to: token.address,
-        value: amount,
-      });
-
-      // Alice moves the eth to Charly
-      await aliceLG.moveEth(charly.address, amount);
-      const balanceAfter = await charly.getBalance();
-
-      // Charly should have +1 eth now
-      const diff = balanceAfter.sub(balanceBefore).toString();
-      expect(diff).to.equal(amount);
-    });
-
     it("should return metadata uints as strings", async function () {
       const URI = "https://left.gallery/v1/metadata/";
 
@@ -172,6 +152,64 @@ describe("LeftGallery", () => {
       )
         .to.emit(controller, "newWork")
         .withArgs(1, charly.address, 10, 2, parseEther("0.5"), 100, 25, false);
+    });
+
+    it("should increase the price with multiplier", async function () {
+      expect(
+        await controller.addArtwork(
+          charly.address,
+          10,
+          2,
+          parseEther("1"),
+          110,
+          25,
+          false
+        )
+      )
+        .to.emit(controller, "newWork")
+        .withArgs(1, charly.address, 10, 2, parseEther("1"), 110, 25, false);
+
+      expect(await bobC.nextPrice(1)).to.equal(parseEther("1"));
+      const firstWorkBeforeSales = await bobC.works(1);
+      expect(firstWorkBeforeSales.previousPrice).to.equal("0");
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("1.0") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          1,
+          "1000001",
+          bob.address,
+          parseEther("1.0"),
+          parseEther("0.75"),
+          parseEther("0.25")
+        );
+
+      const firstWorkAfterSales = await bobC.works(1);
+      expect(firstWorkAfterSales.previousPrice).to.equal(parseEther("1"));
+      expect(await bobC.nextPrice(1)).to.equal(parseEther("1.1"));
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("1.1") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          2,
+          "1000002",
+          bob.address,
+          parseEther("1.1"),
+          parseEther("0.825"),
+          parseEther("0.275")
+        );
+
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("1.21") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          3,
+          "1000003",
+          bob.address,
+          parseEther("1.21"),
+          parseEther("0.9075"),
+          parseEther("0.3025")
+        );
     });
 
     it("should allow someone to buy the artwork", async function () {

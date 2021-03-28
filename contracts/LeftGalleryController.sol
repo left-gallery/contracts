@@ -222,9 +222,11 @@ contract LeftGalleryController is Ownable {
     }
 
     function nextPrice(uint256 workId) public view returns (uint256) {
-        return works[workId].printed == 0
-            ? works[workId].price
-            : works[workId].previousPrice.mul(works[workId].priceMultiplier.div(100));
+        require(works[workId].exists, "WORK_DOES_NOT_EXIST");
+        if (works[workId].printed == 0) {
+            return works[workId].price;
+        }
+        return works[workId].previousPrice.mul(works[workId].priceMultiplier).div(100);
     }
 
     function buy(address recipient, uint256 workId)
