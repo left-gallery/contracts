@@ -176,7 +176,7 @@ describe("LeftGallery", () => {
       // Alice adds Charly's artwork
       await controller.addArtwork(
         charly.address,
-        2, // editions
+        3, // editions
         1, // APs
         parseEther("0.666"),
         15,
