@@ -88,7 +88,7 @@ contract LeftGalleryController is Ownable {
     function addArtwork(
         address payable artist,
         uint256 editions,
-        uint256 AP
+        uint256 AP,
         uint256 price,
         uint256 adminSplit,
         bool _paused
