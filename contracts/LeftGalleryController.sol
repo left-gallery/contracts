@@ -30,6 +30,7 @@ contract LeftGalleryController is Ownable {
         uint256 workId,
         address payable artist,
         uint256 editions,
+        uint256 AP,
         uint256 price,
         uint256 adminSplit,
         bool paused
@@ -38,6 +39,7 @@ contract LeftGalleryController is Ownable {
         uint256 workId,
         address payable artist,
         uint256 editions,
+        uint256 AP,
         uint256 price,
         uint256 adminSplit,
         bool paused
@@ -63,6 +65,7 @@ contract LeftGalleryController is Ownable {
         bool paused;
         uint256 adminSplit;
         uint256 editions;
+        uint256 AP;
         uint256 printed;
         uint256 price;
         address payable artist;
@@ -85,6 +88,7 @@ contract LeftGalleryController is Ownable {
     function addArtwork(
         address payable artist,
         uint256 editions,
+        uint256 AP
         uint256 price,
         uint256 adminSplit,
         bool _paused
@@ -95,11 +99,20 @@ contract LeftGalleryController is Ownable {
 
         works[latestWorkId].exists = true;
         works[latestWorkId].editions = editions;
+        works[latestWorkId].AP = AP;
         works[latestWorkId].price = price;
         works[latestWorkId].artist = artist;
         works[latestWorkId].adminSplit = adminSplit;
         works[latestWorkId].paused = _paused;
-        emit newWork(latestWorkId, artist, editions, price, adminSplit, _paused);
+        emit newWork(
+            latestWorkId,
+            artist,
+            editions,
+            AP,
+            price,
+            adminSplit,
+            _paused
+        );
     }
 
     function updateArtworkPaused(uint256 workId, bool _paused)
@@ -112,6 +125,7 @@ contract LeftGalleryController is Ownable {
             workId,
             works[workId].artist,
             works[workId].editions,
+            works[workId].AP,
             works[workId].price,
             works[workId].adminSplit,
             works[workId].paused
@@ -129,6 +143,7 @@ contract LeftGalleryController is Ownable {
             workId,
             works[workId].artist,
             works[workId].editions,
+            works[workId].AP,
             works[workId].price,
             works[workId].adminSplit,
             works[workId].paused
@@ -145,6 +160,7 @@ contract LeftGalleryController is Ownable {
             workId,
             works[workId].artist,
             works[workId].editions,
+            works[workId].AP,
             works[workId].price,
             works[workId].adminSplit,
             works[workId].paused
@@ -161,6 +177,7 @@ contract LeftGalleryController is Ownable {
             workId,
             works[workId].artist,
             works[workId].editions,
+            works[workId].AP,
             works[workId].price,
             works[workId].adminSplit,
             works[workId].paused
@@ -176,10 +193,11 @@ contract LeftGalleryController is Ownable {
         require(!works[workId].paused, "WORK_NOT_YET_FOR_SALE");
         require(works[workId].exists, "WORK_DOES_NOT_EXIST");
         require(
-            works[workId].editions > works[workId].printed,
+            works[workId].editions + works[workId].AP > works[workId].printed,
             "EDITIONS_EXCEEDED"
         );
         require(msg.value == works[workId].price, "DID_NOT_SEND_PRICE");
+
 
         uint256 editionId = works[workId].printed.add(1);
         works[workId].printed = editionId;
