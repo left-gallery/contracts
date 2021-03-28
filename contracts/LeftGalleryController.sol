@@ -193,7 +193,7 @@ contract LeftGalleryController is Ownable {
         require(!works[workId].paused, "WORK_NOT_YET_FOR_SALE");
         require(works[workId].exists, "WORK_DOES_NOT_EXIST");
         require(
-            works[workId].editions + works[workId].AP > works[workId].printed,
+            works[workId].editions - works[workId].AP > works[workId].printed,
             "EDITIONS_EXCEEDED"
         );
         require(msg.value == works[workId].price, "DID_NOT_SEND_PRICE");
