@@ -31,6 +31,7 @@ contract LeftGalleryController is Ownable {
         address payable artist,
         uint256 editions,
         uint256 price,
+        uint256 adminSplit,
         bool paused
     );
     event updatedWork(
@@ -38,6 +39,7 @@ contract LeftGalleryController is Ownable {
         address payable artist,
         uint256 editions,
         uint256 price,
+        uint256 adminSplit,
         bool paused
     );
     event editionBought(
@@ -59,13 +61,12 @@ contract LeftGalleryController is Ownable {
     struct Work {
         bool exists;
         bool paused;
+        uint256 adminSplit;
         uint256 editions;
         uint256 printed;
         uint256 price;
         address payable artist;
     }
-
-    uint256 public adminSplit = 15;
 
     address payable public adminWallet;
     bool public paused;
@@ -85,6 +86,7 @@ contract LeftGalleryController is Ownable {
         address payable artist,
         uint256 editions,
         uint256 price,
+        uint256 adminSplit,
         bool _paused
     ) public onlyOwner {
         require(editions < MAX_EDITIONS, "MAX_EDITIONS_EXCEEDED");
@@ -95,8 +97,9 @@ contract LeftGalleryController is Ownable {
         works[latestWorkId].editions = editions;
         works[latestWorkId].price = price;
         works[latestWorkId].artist = artist;
+        works[latestWorkId].adminSplit = adminSplit;
         works[latestWorkId].paused = _paused;
-        emit newWork(latestWorkId, artist, editions, price, _paused);
+        emit newWork(latestWorkId, artist, editions, price, adminSplit, _paused);
     }
 
     function updateArtworkPaused(uint256 workId, bool _paused)
@@ -110,6 +113,7 @@ contract LeftGalleryController is Ownable {
             works[workId].artist,
             works[workId].editions,
             works[workId].price,
+            works[workId].adminSplit,
             works[workId].paused
         );
     }
@@ -126,6 +130,7 @@ contract LeftGalleryController is Ownable {
             works[workId].artist,
             works[workId].editions,
             works[workId].price,
+            works[workId].adminSplit,
             works[workId].paused
         );
     }
@@ -141,6 +146,7 @@ contract LeftGalleryController is Ownable {
             works[workId].artist,
             works[workId].editions,
             works[workId].price,
+            works[workId].adminSplit,
             works[workId].paused
         );
     }
@@ -156,6 +162,7 @@ contract LeftGalleryController is Ownable {
             works[workId].artist,
             works[workId].editions,
             works[workId].price,
+            works[workId].adminSplit,
             works[workId].paused
         );
     }
@@ -181,7 +188,7 @@ contract LeftGalleryController is Ownable {
 
         leftGallery.mint(recipient, tokenId);
 
-        uint256 adminReceives = msg.value.mul(adminSplit).div(100);
+        uint256 adminReceives = msg.value.mul(works[workId].adminSplit).div(100);
         uint256 artistReceives = msg.value.sub(adminReceives);
 
         adminWallet.transfer(adminReceives);
@@ -198,9 +205,10 @@ contract LeftGalleryController is Ownable {
         );
     }
 
-    function updateAdminSplit(uint256 _adminSplit) public onlyOwner {
-        require(_adminSplit <= 100, "SPLIT_MUST_BE_LTE_100");
-        adminSplit = _adminSplit;
+    function updateAdminSplit(uint256 workId, uint256 adminSplit) public onlyOwner {
+        require(adminSplit <= 100, "SPLIT_MUST_BE_LTE_100");
+        require(works[workId].exists, "WORK_DOES_NOT_EXIST");
+        works[workId].adminSplit = adminSplit;
     }
 
     function updateAdminWallet(address payable _adminWallet) public onlyOwner {
