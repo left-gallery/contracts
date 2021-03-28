@@ -164,11 +164,12 @@ describe("LeftGallery", () => {
           charly.address,
           10,
           parseEther("0.5"),
+          25,
           false
         )
       )
         .to.emit(controller, "newWork")
-        .withArgs(1, charly.address, 10, parseEther("0.5"), false);
+        .withArgs(1, charly.address, 10, parseEther("0.5"), 25, false);
     });
     it("should allow someone to buy the artwork", async function () {
       // Alice adds Charly's artwork
@@ -176,6 +177,7 @@ describe("LeftGallery", () => {
         charly.address,
         2,
         parseEther("0.666"),
+        15,
         false
       );
 
