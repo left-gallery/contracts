@@ -77,7 +77,6 @@ contract LeftGalleryController is Ownable {
         uint256 printed;
         uint256 price;
         uint256 priceMultiplier;
-        uint256 previousPrice;
         address payable artist;
     }
 
@@ -221,12 +220,11 @@ contract LeftGalleryController is Ownable {
         );
     }
 
-    function nextPrice(uint256 workId) public view returns (uint256) {
-        require(works[workId].exists, "WORK_DOES_NOT_EXIST");
+    function nextPrice(uint256 workId) internal view returns (uint256) {
         if (works[workId].printed == 0) {
             return works[workId].price;
         }
-        return works[workId].previousPrice.mul(works[workId].priceMultiplier).div(100);
+        return works[workId].price.mul(works[workId].priceMultiplier).div(100);
     }
 
     function buy(address recipient, uint256 workId)
@@ -242,12 +240,13 @@ contract LeftGalleryController is Ownable {
 
         require(msg.value >= currentPrice, "DID_NOT_SEND_PRICE");
 
-        works[workId].previousPrice = currentPrice;
+        
         require(
             works[workId].editions - works[workId].AP > works[workId].printed,
             "EDITIONS_EXCEEDED"
         );
         
+        works[workId].price = currentPrice;
         uint256 editionId = works[workId].printed.add(1);
         works[workId].printed = editionId;
 

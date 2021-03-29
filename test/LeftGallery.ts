@@ -169,9 +169,7 @@ describe("LeftGallery", () => {
         .to.emit(controller, "newWork")
         .withArgs(1, charly.address, 10, 2, parseEther("1"), 110, 25, false);
 
-      expect(await bobC.nextPrice(1)).to.equal(parseEther("1"));
       const firstWorkBeforeSales = await bobC.works(1);
-      expect(firstWorkBeforeSales.previousPrice).to.equal("0");
       expect(await bobC.buy(bob.address, 1, { value: parseEther("1.0") }))
         .to.emit(controller, "editionBought")
         .withArgs(
@@ -184,9 +182,6 @@ describe("LeftGallery", () => {
           parseEther("0.25")
         );
 
-      const firstWorkAfterSales = await bobC.works(1);
-      expect(firstWorkAfterSales.previousPrice).to.equal(parseEther("1"));
-      expect(await bobC.nextPrice(1)).to.equal(parseEther("1.1"));
       expect(await bobC.buy(bob.address, 1, { value: parseEther("1.1") }))
         .to.emit(controller, "editionBought")
         .withArgs(
