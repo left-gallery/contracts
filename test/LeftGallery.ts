@@ -157,9 +157,9 @@ describe("LeftGallery", () => {
     it("should increase the price with multiplier", async function () {
       expect(
         await controller.addArtwork(
-          charly.address,
-          10,
-          2,
+          charly.address, // artist
+          10,             // editions
+          2,              // AP
           parseEther("1"),
           110,
           25,
@@ -207,7 +207,7 @@ describe("LeftGallery", () => {
         );
     });
 
-    it("should allow someone to buy the artwork", async function () {
+    it("should allow someone to buy the artwork (but not the AP)", async function () {
       // Alice adds Charly's artwork
       await controller.addArtwork(
         charly.address,
