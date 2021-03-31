@@ -11,6 +11,7 @@ import {
   LeftGalleryController,
 } from "../typechain";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber } from "@ethersproject/bignumber";
 
 chai.use(solidity);
 chai.use(chaiAsPromised);
@@ -94,26 +95,6 @@ describe("LeftGallery", () => {
       );
     });
 
-    it("should allow owner to move funds", async function () {
-      return;
-      const amount = parseEther("1");
-      const balanceBefore = await charly.getBalance();
-
-      // Bob sends eth to the contract
-      await bob.sendTransaction({
-        to: token.address,
-        value: amount,
-      });
-
-      // Alice moves the eth to Charly
-      await aliceLG.moveEth(charly.address, amount);
-      const balanceAfter = await charly.getBalance();
-
-      // Charly should have +1 eth now
-      const diff = balanceAfter.sub(balanceBefore).toString();
-      expect(diff).to.equal(amount);
-    });
-
     it("should return metadata uints as strings", async function () {
       const URI = "https://left.gallery/v1/metadata/";
 
@@ -163,19 +144,104 @@ describe("LeftGallery", () => {
         await controller.addArtwork(
           charly.address,
           10,
+          2,
           parseEther("0.5"),
+          100,
+          25,
           false
         )
       )
         .to.emit(controller, "newWork")
-        .withArgs(1, charly.address, 10, parseEther("0.5"), false);
+        .withArgs(1, charly.address, 10, 2, parseEther("0.5"), 100, 25, false);
     });
-    it("should allow someone to buy the artwork", async function () {
+
+    async function expectCurrentPriceToEqual(expectedPrice: string) {
+      const expectedPriceBigNumber = parseEther(expectedPrice)
+      const work1 = await controller.works(1);
+      expect(work1.price).to.equal(expectedPriceBigNumber )
+    }
+
+    it("should increase the price with multiplier", async function () {
+      expect(
+        await controller.addArtwork(
+          charly.address, // artist
+          10,             // editions
+          2,              // AP
+          parseEther("0.05"),
+          200,
+          15,
+          false
+        )
+      )
+        .to.emit(controller, "newWork")
+        .withArgs(1, charly.address, 10, 2, parseEther("0.05"), 200, 15, false);
+        
+      await expectCurrentPriceToEqual("0.05")
+      
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("0.05") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          1,
+          "1000001",
+          bob.address,
+          parseEther("0.05"),
+          parseEther("0.0425"),
+          parseEther("0.0075")
+        );
+
+      await expectCurrentPriceToEqual("0.1")
+
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("0.1") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          2,
+          "1000002",
+          bob.address,
+          parseEther("0.1"),
+          parseEther("0.085"),
+          parseEther("0.015")
+        );
+
+      await expectCurrentPriceToEqual("0.2")
+  
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("0.2") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          3,
+          "1000003",
+          bob.address,
+          parseEther("0.2"),
+          parseEther("0.17"),
+          parseEther("0.03")
+        );
+        await expectCurrentPriceToEqual("0.4")
+    
+      expect(await bobC.buy(bob.address, 1, { value: parseEther("0.4") }))
+        .to.emit(controller, "editionBought")
+        .withArgs(
+          1,
+          4,
+          "1000004",
+          bob.address,
+          parseEther("0.4"),
+          parseEther("0.34"),
+          parseEther("0.06")
+        );
+        await expectCurrentPriceToEqual("0.8")
+    });
+
+    it("should allow someone to buy the artwork (but not the AP)", async function () {
       // Alice adds Charly's artwork
       await controller.addArtwork(
         charly.address,
-        2,
+        3, // editions
+        1, // APs
         parseEther("0.666"),
+        100, // multiplier
+        15,
         false
       );
 
